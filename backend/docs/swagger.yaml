@@ -1,0 +1,297 @@
+openapi: 3.0.0
+info:
+  title: Blog API
+  version: 1.0.0
+  description: API documentation for the blog application
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          description: Unique identifier for user
+        email:
+          type: string
+          description: Email for user
+        password:
+          type: string
+          description: Secret password for user's authentication
+      example:
+        username: "bobohobigboy"
+        email: "bobohobigboy@gmail.com"
+        password: "!bobohobigboy@387"
+    Post:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        id:
+          type: string
+          description: The auto-generated ID of the post
+        title:
+          type: string
+          description: The title of the post
+        content:
+          type: string
+          description: The content of the post
+        author:
+          type: string
+          description: The ID of the user who created the post
+        createdAt:
+          type: string
+          format: date-time
+          description: The date the post was created
+      example:
+        id: "610c4b8721462231d4ef7f7b"
+        title: "My first blog post"
+        content: "This is the content of the post."
+        author: "610c4b8721462231d4ef7f6a"
+        createdAt: "2021-08-06T18:25:43.511Z"
+    Comment:
+      type: object
+      required:
+        - content
+      properties:
+        id:
+          type: string
+          description: The auto-generated ID of the post
+        content:
+          type: string
+          description: The content of the post
+        author:
+          type: string
+          description: The ID of the user who created the post
+        post:
+          type: string
+          description: the ID of the post that the comment have on
+        createdAt:
+          type: string
+          format: date-time
+          description: The date the post was created
+      example:
+          id: "66f9f26667798629f61a2837"
+          content: "wah sepertinya enak"
+          author: "66e66d0b1034b05949b6a595"
+          post: "66f9f1ee67798629f61a2833"
+          createdAt: "2024-09-30T00:35:50.450Z"
+security:
+  - bearerAuth: []
+
+
+paths: 
+  /users/register:
+   post:
+     summary: Register a new user
+     tags: [Users]
+     requestBody:
+       required: true
+       content:
+         application/json:
+           schema:
+             type: object
+             properties:
+               username:
+                 type: string
+                 description: The user's unique identifier
+               email:
+                 type: string
+                 description: Email address
+               password:
+                 type: string
+     responses:
+       200:
+         description: User registered successfully
+       400:
+         description: Bad request
+  /users/login:
+   post:
+     summary: Login a registered user
+     tags: [Users]
+     requestBody:
+       required: true
+       content:
+         application/json:
+           schema:
+             type: object
+             properties:
+               email:
+                 type: string
+               password:
+                 type: string
+     responses:
+       200:
+         description: User Login successfully
+       400:
+         description: Bad request
+  /posts:
+    post:
+      summary: Create a Post
+      security:
+       - bearerAuth: []
+      tags: [Post]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+      responses:
+        201:
+          description: Post successfully created
+        500:
+          description: Server error
+    get:
+      summary: Get all Post
+      tags: [Post]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+      responses:
+        500:
+          description: Server error
+  /posts/:id:
+    get:
+      summary: Get a Post
+      tags: [Post]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        404:
+          description: Post not found
+        500:
+          description: Server error
+    put:
+      summary: Update a Post
+      security:
+       - bearerAuth: []
+      tags: [Post]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        404:
+          description: Post not found
+        401:
+          description: User not authorized
+        500:
+          description: Server error
+    delete:
+      summary: Delete a Post and associated comment
+      tags: [Post]
+      security:
+       - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        404:
+          description: Post not found
+        401:
+          description: User not authorized
+        500:
+          description: Server error
+
+  /comments/:postId:
+    post:
+     summary: Create a Comment to a Post
+     security:
+      - bearerAuth: []
+     tags: [Comment]
+     requestBody:
+       required: true
+       content:
+         application/json:
+           schema:
+             type: object
+             properties:
+               content:
+                 type: string
+     responses:
+       404:
+         description: Post not found
+       201:
+          description: Comment succesfully saved
+       500:
+         description: Server error
+    get:
+     summary: Get all comments from a Post
+     tags: [Comment]
+     requestBody:
+       required: true
+       content:
+         application/json:
+           schema:
+             type: array
+     responses:
+       404:
+         description: Post not found
+       500:
+         description: Server error
+  
+  /comments/:id:
+   put:
+     summary: Update a comment
+     security:
+      - bearerAuth: []
+     tags: [Comment]
+     requestBody:
+       required: true
+       content:
+         application/json:
+           schema:
+             type: object
+             properties:
+               content:
+                 type: string
+     responses:
+       404:
+         description: Post not found
+       500:
+         description: Server error
+    
+   delete:
+     summary: Delete a comment
+     security:
+      - bearerAuth: []
+     tags: [Comment]
+     requestBody:
+       required: true
+       content:
+         application/json:
+           schema:
+             type: object
+     responses:
+       404:
+         description: Post not found
+       401:
+         description: User not authorized
+       500:
+         description: Server error
